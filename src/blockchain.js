@@ -83,7 +83,14 @@ class Blockchain {
 
 				// Push block onto chain
 				self.chain.push(block);
-				resolve(block);
+
+				// Validate Chain
+				const validationErrors = await self.validateChain();
+        if (validationErrors.length === 0) {
+				  resolve(block);
+        } else {
+          reject('Unable to validate chain');
+        }
 			} else {
 				reject('Something bad happened');
 			}
@@ -145,8 +152,12 @@ class Blockchain {
 
 			if (bitcoinMessage.verify(message, address, signature)) {
 				const data = { owner: address, star };
+
+				// Add new Block
 				const newBlock = await self._addBlock(new BlockClass.Block(data));
 				resolve(newBlock);
+			} else {
+				reject('Unable to verify signature');
 			}
 		});
 	}
@@ -212,21 +223,17 @@ class Blockchain {
 		let self = this;
 		let errorLog = [];
 		return new Promise(async (resolve, reject) => {
-
-      // Validate chain after Genesis Block
+			// Validate chain after Genesis Block
 			const nonGenesisChain = self.chain.slice(1);
-
-      
 			for (let block of nonGenesisChain) {
-
-        // Check that each block is valid
+				// Check that each block is valid
 				if (!block.validate()) {
 					errorLog.push('Block invalid');
 				}
 				// Variable with previous block hash
 				const prevHash = self.chain[block.height - 1].hash;
 
-        // Check that previousBlockHash is the previous Block's hash
+				// Check that previousBlockHash is the previous Block's hash
 				if (block.previousBlockHash !== prevHash) {
 					errorLog.push('Chain invalid - Previous Hash Error');
 				}
