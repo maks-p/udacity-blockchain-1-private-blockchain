@@ -78,6 +78,7 @@ class Blockchain {
 			block.hash = SHA256(JSON.stringify(block)).toString();
 
 			if (block) {
+        console.log(block)
 				// Update the chain height
 				this.height = chainHeight + 1;
 

@@ -40,11 +40,17 @@ class Block {
 			// Save in auxiliary variable the current block hash
 			const currentHash = self.hash;
 
-			// Recalculate the hash of the Block
-			const hash = SHA256(self.body);
+			// Set the Block's hash to null so we can validate
+      self.hash = null 
+
+      // Recalculate the hash for the entire block to ensure the data is the same
+			const hashCheck = SHA256(JSON.stringify(self)).toString();
+
+      // Set the Block's hash back to the auxilary variable / currentHash
+      self.hash = currentHash;
 
 			// Comparing if the hashes changed
-			resolve(currentHash === hash);
+			resolve(currentHash === hashCheck);
 		});
 	}
 
